@@ -1,0 +1,8 @@
+cachetools==6.1.0
+matplotlib==3.10.5
+numpy==2.3.2
+pandas==2.3.2
+scipy==1.16.1
+seaborn==0.13.2
+torch==2.7.1+cu118
+tqdm==4.67.1
