@@ -315,29 +315,36 @@ class SimpleProcess(Process):
                         )
 
             elif current_node.gateway_type == "XOR":
-                # Probabilistic split using data_options
+                # Deterministic-if-available, else probabilistic split using data_options
                 if not current_node.conditions:
                     raise ValueError(f"XOR gateway '{process_element.label}' missing conditions[]")
-                attr = current_node.conditions[0]
-                distribution = process_structure.data_options.get(attr)
-                if distribution is None:
-                    raise KeyError(
-                        f"XOR gateway '{process_element.label}' expects data_options['{attr}'] not found."
-                    )
-                # weights follow the order of next_tasks
-                try:
-                    weights = [distribution[label] for label in current_node.next_tasks]
-                except KeyError as e:
-                    raise KeyError(
-                        f"XOR gateway '{process_element.label}' has next task '{e.args[0]}' "
-                        f"not present in data_options['{attr}']."
-                    )
 
-                chosen_label = random.choices(current_node.next_tasks, weights=weights, k=1)[0]
+                attr = current_node.conditions[0]
+                case_data_for_case = self.case_data.get(case_id, {})
+
+                # If case data already specifies the route and it's valid, honor it.
+                if attr in case_data_for_case and case_data_for_case[attr] in current_node.next_tasks:
+                    chosen_label = case_data_for_case[attr]
+                else:
+                    distribution = process_structure.data_options.get(attr)
+                    if distribution is None:
+                        raise KeyError(
+                            f"XOR gateway '{process_element.label}' expects data_options['{attr}'] not found."
+                        )
+                    try:
+                        weights = [distribution[label] for label in current_node.next_tasks]
+                    except KeyError as e:
+                        raise KeyError(
+                            f"XOR gateway '{process_element.label}' has next task '{e.args[0]}' "
+                            f"not present in data_options['{attr}']."
+                        )
+                    chosen_label = random.choices(current_node.next_tasks, weights=weights, k=1)[0]
+
                 next_node = process_structure.tasks[chosen_label]
                 is_gateway = isinstance(next_node, Gateway)
-                next_type = ProcessElementType.EVENT if is_gateway else (
-                    ProcessElementType.TASK if getattr(next_node, "resources", None) else ProcessElementType.EVENT
+                next_type = (
+                    ProcessElementType.EVENT if is_gateway else
+                    (ProcessElementType.TASK if getattr(next_node, "resources", None) else ProcessElementType.EVENT)
                 )
                 next_elements.append(
                     ProcessElement(

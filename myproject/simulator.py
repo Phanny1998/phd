@@ -284,6 +284,19 @@ class Simulator:
         pe = simulation_item.process_element
 
         self.busy_resources[resource] = pe
+
+        # -------------------------------
+        # NEW: bind lane when MOULDING starts
+        # This ensures ROUTE_TO_A1 will follow case_data['moulding_lane']
+        # matching the actual MOULDING_MACHINE_i that was chosen.
+        if pe.label == "MOULDING" and resource and resource.name.startswith("MOULDING_MACHINE_"):
+            try:
+                lane_idx = resource.name.rsplit("_", 1)[1]  # "1".."5"
+                self.process.add_data(pe, {"moulding_lane": f"ASSEMBLY_1_{lane_idx}"})
+            except Exception:
+                # Don't break the sim if a name is unexpected
+                pass
+        # -------------------------------
         processing_time = self.process.processing_time_sample(resource, pe, self.now)
         self.task_start_times[pe.id] = self.now
 
