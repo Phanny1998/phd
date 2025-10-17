@@ -377,6 +377,22 @@ class Simulator:
             )
         elif process_element.is_task():
             self.unassigned_tasks[process_element.id] = process_element
+            if not hasattr(self.process, "task_first_ready_time"):
+                self.process.task_first_ready_time = {}
+            self.process.task_first_ready_time.setdefault(process_element.id, self.now)
+            # Log true station-arrival (queue) time
+            self.event_log.log_event(
+                method=self.process.allocation_method_name,
+                num_processes=len(self.process.case_types),
+                simulation_run=self.simulation_run,
+                timestamp=self.now,
+                process=process_element.case_type,
+                l=self.process.arrival_distributions[process_element.case_type],
+                status="queued",
+                case_id=process_element.case_id,
+                activity=process_element.label,
+)
+
             self.schedule_event(
                 self.now,
                 SimulationItem(SimulationItemType.ASSIGN_RESOURCES, self.now, None),

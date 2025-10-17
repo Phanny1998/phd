@@ -213,6 +213,8 @@ class SimpleProcess(Process):
         self.case_type = dict()
         self.case_data = dict()
         self.completed_tasks = dict()
+        # NEW: true station-arrival timestamps for tasks
+        self.task_first_ready_time = dict()
         try:
             self.last_task_completion_time = dict()
         except Exception:
@@ -257,6 +259,8 @@ class SimpleProcess(Process):
     def generate_case_data(self, data_options: Dict[str, Dict[str, float]]) -> Dict:
         case_data: Dict[str, str] = {}
         for key, value_probs in data_options.items():
+            if key.startswith("qc_") or key == "moulding_lane":
+                continue
             values = list(value_probs.keys())
             probs = list(value_probs.values())
             case_data[key] = random.choices(values, weights=probs, k=1)[0]
@@ -321,9 +325,12 @@ class SimpleProcess(Process):
 
                 attr = current_node.conditions[0]
                 case_data_for_case = self.case_data.get(case_id, {})
+                is_qc_key = attr.startswith("qc_")
 
                 # If case data already specifies the route and it's valid, honor it.
-                if attr in case_data_for_case and case_data_for_case[attr] in current_node.next_tasks:
+                if (not is_qc_key
+                    and attr in case_data_for_case 
+                    and case_data_for_case[attr] in current_node.next_tasks):
                     chosen_label = case_data_for_case[attr]
                 else:
                     distribution = process_structure.data_options.get(attr)

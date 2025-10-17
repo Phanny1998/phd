@@ -33,7 +33,7 @@ class FIFO(SimpleProcess):
         super().__init__(processes)
         self.allocation_method_name = "FIFO"
 
-    def assign_resources(
+    '''def assign_resources(
         self,
         unassigned_tasks: Dict[int, ProcessElement],
         available_resources: Set[Resource],
@@ -97,8 +97,80 @@ class FIFO(SimpleProcess):
             if not made_progress:
                 break
 
-        return assignments
+        return assignments'''
+    
+    def assign_resources(
+        self,
+        unassigned_tasks: Dict[int, ProcessElement],
+        available_resources: Set[Resource],
+        resource_available_times: Dict[Resource, float],
+    ) -> List[Tuple[ProcessElement, Resource]]:
+        """
+        Strict FIFO per station (activity label):
+        - Build a queue per station label ordered by task activation (task.id).
+        - For each station, assign available machines to the head of that station's queue.
+        - Machine tie-break: earliest available time (longest idle), then name.
+        """
+        assignments: List[Tuple[ProcessElement, Resource]] = []
+        if not unassigned_tasks or not available_resources:
+            return assignments
 
+        # 1) Build per-station FIFO queues (only TASKs get here)
+        station_queues: Dict[str, List[ProcessElement]] = {}
+        for pe in unassigned_tasks.values():
+            station_queues.setdefault(pe.label, []).append(pe)
+        '''for q in station_queues.values():
+            # activation order proxy: smaller task.id == earlier activation
+            q.sort(key=lambda t: t.id)'''
+        for q in station_queues.values():
+            q.sort(key=lambda t: (self.task_first_ready_time.get(t.id, float("inf")), t.id))
+
+
+        # 2) For each station label present, get the compatible resources
+        #    (use a representative task's case_type to fetch that station's Task definition)
+        station_resources: Dict[str, List[Resource]] = {}
+        for label, queue in station_queues.items():
+            pe0 = queue[0]
+            task_def: Task = self.process_definitions[pe0.case_type].tasks[label]  # type: ignore
+            station_resources[label] = list(task_def.resources) if getattr(task_def, "resources", None) else []
+
+        temp_available: Set[Resource] = set(available_resources)
+
+        made_progress = True
+        while made_progress and temp_available:
+            made_progress = False
+
+            # Deterministic station iteration order
+            for label in sorted(station_queues.keys()):
+                if not temp_available:
+                    break
+                if not station_queues[label]:
+                    continue
+
+                # Which compatible resources for this station are free now?
+                compat_free = [r for r in station_resources.get(label, []) if r in temp_available]
+                if not compat_free:
+                    continue
+
+                # Take the head of the station queue (strict FIFO at the station)
+                pe = station_queues[label][0]
+
+                # Choose the machine that's been idle the longest (tie-break by name)
+                chosen_res = min(
+                    compat_free,
+                    key=lambda r: (resource_available_times.get(r, 0.0), r.name),
+                )
+
+                # Record assignment
+                assignments.append((pe, chosen_res))
+                temp_available.remove(chosen_res)
+
+                # Remove from the station queue; Simulator will pop from unassigned_tasks after scheduling START
+                station_queues[label].pop(0)
+
+                made_progress = True
+
+        return assignments
 
 # -----------------------------
 # Batch runner (multiprocessing)
