@@ -534,7 +534,7 @@ def process_function(l: float, scenario: str):
 # ========================================
 # Simulation Configuration
 # ========================================
-ARRIVAL_RATES = [0.1]#, 0.2, 0.3, 0.5]  # Batches per minute (adjust to your demand)
+ARRIVAL_RATES = [0.28]#, 0.2, 0.3, 0.5]  # Batches per minute (adjust to your demand)
 SCENARIO_NAMES = [
     'actuator_manufacturing_with_rework'#,
     #'actuator_manufacturing_no_rework'    
@@ -543,4 +543,4 @@ SCENARIO_NAMES = [
   # For comparison
 ]
 SIMULATION_RUN_TIME = 5000  # 48 hours in minutes (2 shifts)
-SIMULATION_RUNS = 1  # Statistical reliability
+SIMULATION_RUNS = 10  # Statistical reliability

@@ -234,6 +234,6 @@ if __name__ == "__main__":
                     f.write(f"FIFO,{l},{run_id},{runtime_seconds:.2f}\n")
 
             combined_df = pd.concat(combined_logs, ignore_index=True)
-            result_filename = f"results/FIFO_l{l}_{scenario_name}.csv"
+            result_filename = f"results/251020FIFO_l{l}_{scenario_name}.csv"
             combined_df.to_csv(result_filename, index=False)
             print(f"Saved results to {result_filename}")
