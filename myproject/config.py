@@ -542,5 +542,5 @@ SCENARIO_NAMES = [
     # 'actuator_mfg_pooledM_dedicatedA1_no_rework',
   # For comparison
 ]
-SIMULATION_RUN_TIME = 5000  # 48 hours in minutes (2 shifts)
-SIMULATION_RUNS = 10  # Statistical reliability
+SIMULATION_RUN_TIME = 30000  # 48 hours in minutes (2 shifts)
+SIMULATION_RUNS = 1  # Statistical reliability
