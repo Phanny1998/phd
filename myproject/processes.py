@@ -258,13 +258,23 @@ class SimpleProcess(Process):
 
     def generate_case_data(self, data_options: Dict[str, Dict[str, float]]) -> Dict:
         case_data: Dict[str, str] = {}
+        # router keys are set by the simulator at first start (do NOT pre-sample here)
+        SKIP_KEYS = {
+            "moulding_lane",  # used by your pooled scenario
+            "mould_lane",     # used by the new dedicated scenario
+            "a1_lane",
+            "a2_lane",
+            "pack_lane",
+            "always"          # trivial router helper
+        }
         for key, value_probs in data_options.items():
-            if key.startswith("qc_") or key == "moulding_lane":
+            if key.startswith("qc_") or key in SKIP_KEYS:
                 continue
             values = list(value_probs.keys())
             probs = list(value_probs.values())
             case_data[key] = random.choices(values, weights=probs, k=1)[0]
         return case_data
+
 
     def data_sample(self, process_element: ProcessElement) -> Dict:
         try:
@@ -346,6 +356,14 @@ class SimpleProcess(Process):
                             f"not present in data_options['{attr}']."
                         )
                     chosen_label = random.choices(current_node.next_tasks, weights=weights, k=1)[0]
+                # --- NEW: write lane key at routing time if not already set (sticky fallback) ---
+                # Only for lane routers (not QC keys). This records the chosen lane once so
+                # subsequent loops stick to the same lane and the log shows the lane in `data`.
+                if not is_qc_key and attr in {"mould_lane", "a1_lane", "a2_lane", "pack_lane"}:
+                    cd = self.case_data.get(case_id, {})
+                    if attr not in cd:
+                        self.add_data(process_element, {attr: chosen_label})
+            # -------------------------------------------------------------------------------
 
                 next_node = process_structure.tasks[chosen_label]
                 is_gateway = isinstance(next_node, Gateway)

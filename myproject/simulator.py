@@ -82,6 +82,7 @@ class EventLog:
             writer = csv.DictWriter(f, fieldnames=self.fields)
             writer.writeheader()
 
+    # inside class EventLog (myproject251110/simulator.py)
     def log_event(self, **kwargs):
         if self.log_only_case_completion and kwargs.get("status") != "COMPLETE":
             return
@@ -279,16 +280,15 @@ class Simulator:
             self.now, SimulationItem(SimulationItemType.ASSIGN_RESOURCES, self.now, None)
         )
 
-    def handle_start_task(self, simulation_item: SimulationItem):
+    def handle_start_task(self, simulation_item):
         resource = simulation_item.resource
         pe = simulation_item.process_element
 
+        # Mark resource busy with this task
         self.busy_resources[resource] = pe
 
-        # -------------------------------
-        # NEW: bind lane when MOULDING starts
-        # This ensures ROUTE_TO_A1 will follow case_data['moulding_lane']
-        # matching the actual MOULDING_MACHINE_i that was chosen.
+        # ---------- (kept from your code) Pooled-scenario binding for MOULDING ----------
+        # This is your existing trick that sets a moulding_lane used by the pooled A1 router.
         if pe.label == "MOULDING" and resource and resource.name.startswith("MOULDING_MACHINE_"):
             try:
                 lane_idx = resource.name.rsplit("_", 1)[1]  # "1".."5"
@@ -296,7 +296,9 @@ class Simulator:
             except Exception:
                 # Don't break the sim if a name is unexpected
                 pass
-        # -------------------------------
+        # -------------------------------------------------------------------------------
+
+        # Sample processing time and schedule completion (unchanged)
         processing_time = self.process.processing_time_sample(resource, pe, self.now)
         self.task_start_times[pe.id] = self.now
 
@@ -310,6 +312,10 @@ class Simulator:
             ),
         )
 
+        # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        # THIS is the exact line you were asking about:
+        # The "running" event is logged here in your original code.
+        # We'll insert the dedicated/sticky lane-binding *after this call*.
         self.event_log.log_event(
             method=self.process.allocation_method_name,
             num_processes=len(self.process.case_types),
@@ -323,6 +329,62 @@ class Simulator:
             resource=resource.name,
             end_time=self.now + processing_time,
         )
+        # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+        # ---------- NEW: bind lanes ONLY for the dedicated+sticky scenario ----------
+        # We put this AFTER the "running" log so you can find the insertion spot easily.
+        # Functionally, it’s still early enough (at task start) to affect subsequent routing.
+        def _set_lane_once(key: str, val: str):
+            cd = self.process.case_data.get(pe.case_id, {})
+            if key not in cd:
+                self.process.add_data(pe, {key: val})
+
+        if getattr(self, "scenario_name", "") == "all_dedicated_sticky_with_rework":
+
+            # MOULDING lanes (MOULDING_1..5) — also freeze the matching A1 lane here
+            if pe.label.startswith("MOULDING_") and resource and resource.name.startswith("MOULDING_MACHINE_"):
+                try:
+                    idx = resource.name.rsplit("_", 1)[1]  # "1".."5"
+                    _set_lane_once("mould_lane", f"MOULDING_{idx}")
+                    _set_lane_once("a1_lane",    f"ASSEMBLY_1_{idx}")   # ← NEW: sticky MOULDING_i → A1_i
+                except Exception:
+                    pass
+
+
+            # A1 lanes (ASSEMBLY_1_1.._5)  resource example: LINE_3_ASSEMBLY1
+            # A1 lanes (ASSEMBLY_1_1.._5) — robust match + fallback from task label
+            if pe.label.startswith("ASSEMBLY_1") and resource:
+                try:
+                    rname = resource.name.strip()
+                    if ("ASSEMBLY1" in rname):  # accept LINE_3_ASSEMBLY1, etc.
+                        # try to pull the lane index from the resource name
+                        parts = [p for p in rname.split("_") if p.isdigit()]
+                        if parts:
+                            idx = parts[0]
+                        else:
+                            # fallback: derive from task label "ASSEMBLY_1_<idx>"
+                            idx = pe.label.rsplit("_", 1)[1]
+                        _set_lane_once("a1_lane", f"ASSEMBLY_1_{idx}")
+                except Exception:
+                    pass
+
+            # A2 lanes (ASSEMBLY_2_1.._2)  resource example: ASSEMBLY2_LINE_1
+            if pe.label.startswith("ASSEMBLY_2") and resource and "ASSEMBLY2_LINE_" in resource.name:
+                try:
+                    idx = resource.name.rsplit("_", 1)[1]  # "1" or "2"
+                    _set_lane_once("a2_lane", f"ASSEMBLY_2_{idx}")
+                except Exception:
+                    pass
+
+            # PACKAGING lanes (PACKAGING_1.._3)  resource example: PACKAGING_LINE_2
+            if pe.label.startswith("PACKAGING") and resource and resource.name.startswith("PACKAGING_LINE_"):
+                try:
+                    idx = resource.name.rsplit("_", 1)[1]  # "1".."3"
+                    _set_lane_once("pack_lane", f"PACKAGING_{idx}")
+                except Exception:
+                    pass
+        # ---------------------------------------------------------------------------
+
 
     def handle_complete_case(self, process_element: ProcessElement):
         cid = process_element.case_id

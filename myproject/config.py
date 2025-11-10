@@ -526,8 +526,166 @@ def process_function(l: float, scenario: str):
                 data_options=data_options,
                 tasks=tasks
             ))
+    
+        return processes
+    elif scenario == 'all_dedicated_sticky_with_rework':
+        processes = []
+        for variant_id in range(1, 19):
+            variant_name = f"variant_{variant_id}"
+
+            # --- base times (keep your A1 variant tweak like before) ---
+            moulding_time  = (5.0, 0.5)
+            assembly1_time = (8.0, 1.0)
+            assembly2_time = (6.0, 0.8)
+            sorting_time   = (3.0, 0.3)
+            packaging_time = (4.0, 0.5)
+
+            if variant_id <= 6:
+                assembly1_time = (7.0, 0.8)
+            elif variant_id <= 12:
+                assembly1_time = (8.5, 1.0)
+            else:
+                assembly1_time = (10.0, 1.2)
+
+            # --- lane-specific QC (sticky) + deterministic lane keys we will set in simulator ---
+            data_options = {
+                # Lane keys (deterministic XOR; values are dummies — engine uses case_data set at first start)
+                "mould_lane": {f"MOULDING_{i}": 1 for i in range(1, 6)},
+                "a1_lane":    {f"ASSEMBLY_1_{i}": 1 for i in range(1, 6)},
+                "a2_lane":    {f"ASSEMBLY_2_{i}": 1 for i in range(1, 2+1)},
+                "pack_lane":  {f"PACKAGING_{i}": 1 for i in range(1, 3+1)},
+                "always": {"SORTING": 1},  # trivial router
+
+                # Lane-specific QC (fail -> same lane; pass -> next router)
+                **{f"qc_after_moulding_{i}": {f"MOULDING_{i}": 0.05, "ROUTE_TO_A1": 0.95} for i in range(1, 6)},
+                **{f"qc_after_a1_{i}": {f"ASSEMBLY_1_{i}": 0.05, "ROUTE_TO_A2": 0.95} for i in range(1, 6)},
+                "qc_after_a2_1": {"ASSEMBLY_2_1": 0.05, "ROUTE_TO_SORTING": 0.95},
+                "qc_after_a2_2": {"ASSEMBLY_2_2": 0.05, "ROUTE_TO_SORTING": 0.95},
+                "qc_after_packaging_1": {"END": 0.95, "PACKAGING_1": 0.05},
+                "qc_after_packaging_2": {"END": 0.95, "PACKAGING_2": 0.05},
+                "qc_after_packaging_3": {"END": 0.95, "PACKAGING_3": 0.05},
+                "qc_after_sorting": {"ROUTE_TO_PACKAGING": 0.95, "SORTING": 0.05},
+
+            }
+
+            # --- tasks/gateways (all dedicated; sticky via lane-specific QC) ---
+            tasks = {
+                "START": Task(name=f"{variant_name}_START", next_tasks=["ROUTE_TO_MOULDING"]),
+
+                # MOULDING dedicated (5)
+                "ROUTE_TO_MOULDING": Gateway(
+                    name=f"{variant_name}_ROUTE_TO_MOULDING",
+                    gateway_type="XOR", conditions=["mould_lane"],
+                    next_tasks=[f"MOULDING_{i}" for i in range(1, 6)]
+                ),
+            }
+            # MOULD lanes + QC
+            for i in range(1, 6):
+                tasks[f"MOULDING_{i}"] = Task(
+                    name=f"{variant_name}_MOULDING_{i}",
+                    resources=[Resource(f"MOULDING_MACHINE_{i}", moulding_time)],
+                    next_tasks=[f"QC_AFTER_MOULDING_{i}"]
+                )
+                tasks[f"QC_AFTER_MOULDING_{i}"] = Gateway(
+                    name=f"{variant_name}_QC_AFTER_MOULDING_{i}",
+                    gateway_type="XOR", conditions=[f"qc_after_moulding_{i}"],
+                    next_tasks=[f"MOULDING_{i}", "ROUTE_TO_A1"]
+                )
+
+            # A1 dedicated (5)
+            tasks["ROUTE_TO_A1"] = Gateway(
+                name=f"{variant_name}_ROUTE_TO_A1",
+                gateway_type="XOR", conditions=["a1_lane"],
+                next_tasks=[f"ASSEMBLY_1_{i}" for i in range(1, 6)]
+            )
+            for i in range(1, 6):
+                tasks[f"ASSEMBLY_1_{i}"] = Task(
+                    name=f"{variant_name}_ASSEMBLY_1_{i}",
+                    resources=[Resource(f"LINE_{i}_ASSEMBLY1", assembly1_time)],
+                    next_tasks=[f"QC_AFTER_A1_{i}"]
+                )
+                tasks[f"QC_AFTER_A1_{i}"] = Gateway(
+                    name=f"{variant_name}_QC_AFTER_A1_{i}",
+                    gateway_type="XOR", conditions=[f"qc_after_a1_{i}"],
+                    next_tasks=[f"ASSEMBLY_1_{i}", "ROUTE_TO_A2"]
+                )
+
+            # A2 dedicated (2)
+            tasks["ROUTE_TO_A2"] = Gateway(
+                name=f"{variant_name}_ROUTE_TO_A2",
+                gateway_type="XOR", conditions=["a2_lane"],
+                next_tasks=["ASSEMBLY_2_1", "ASSEMBLY_2_2"]
+            )
+            tasks["ASSEMBLY_2_1"] = Task(
+                name=f"{variant_name}_ASSEMBLY_2_1",
+                resources=[Resource("ASSEMBLY2_LINE_1", assembly2_time)],
+                next_tasks=["QC_AFTER_A2_1"]
+            )
+            tasks["QC_AFTER_A2_1"] = Gateway(
+                name=f"{variant_name}_QC_AFTER_A2_1",
+                gateway_type="XOR", conditions=["qc_after_a2_1"],
+                next_tasks=["ASSEMBLY_2_1", "ROUTE_TO_SORTING"]
+            )
+            tasks["ASSEMBLY_2_2"] = Task(
+                name=f"{variant_name}_ASSEMBLY_2_2",
+                resources=[Resource("ASSEMBLY2_LINE_2", assembly2_time)],
+                next_tasks=["QC_AFTER_A2_2"]
+            )
+            tasks["QC_AFTER_A2_2"] = Gateway(
+                name=f"{variant_name}_QC_AFTER_A2_2",
+                gateway_type="XOR", conditions=["qc_after_a2_2"],
+                next_tasks=["ASSEMBLY_2_2", "ROUTE_TO_SORTING"]
+            )
+
+            # SORTING (single)
+            tasks["ROUTE_TO_SORTING"] = Gateway(
+                name=f"{variant_name}_ROUTE_TO_SORTING",
+                gateway_type="XOR", conditions=["always"],
+                next_tasks=["SORTING"]
+            )
+            tasks["SORTING"] = Task(
+                name=f"{variant_name}_SORTING",
+                resources=[Resource("SORTING_ROBOT", sorting_time)],
+                next_tasks=["QC_AFTER_SORTING"]
+            )
+
+            tasks["QC_AFTER_SORTING"] = Gateway(
+                name=f"{variant_name}_QC_AFTER_SORTING",
+                gateway_type="XOR",
+                conditions=["qc_after_sorting"],
+                next_tasks=["ROUTE_TO_PACKAGING", "SORTING"]  # pass → route, fail → rework Sorting
+            )
+
+            # PACKAGING dedicated (3)
+            tasks["ROUTE_TO_PACKAGING"] = Gateway(
+                name=f"{variant_name}_ROUTE_TO_PACKAGING",
+                gateway_type="XOR", conditions=["pack_lane"],
+                next_tasks=["PACKAGING_1","PACKAGING_2","PACKAGING_3"]
+            )
+            for i in range(1, 3+1):
+                tasks[f"PACKAGING_{i}"] = Task(
+                    name=f"{variant_name}_PACKAGING_{i}",
+                    resources=[Resource(f"PACKAGING_LINE_{i}", packaging_time)],
+                    next_tasks=[f"QC_AFTER_PACKAGING_{i}"]
+                )
+                tasks[f"QC_AFTER_PACKAGING_{i}"] = Gateway(
+                    name=f"{variant_name}_QC_AFTER_PACKAGING_{i}",
+                    gateway_type="XOR", conditions=[f"qc_after_packaging_{i}"],
+                    next_tasks=["END", f"PACKAGING_{i}"]
+                )
+
+            tasks["END"] = Task(name=f"{variant_name}_END", next_tasks=[])
+
+            processes.append(ProcessStructure(
+                name=variant_name,
+                arrival_distribution=l/18,
+                data_options=data_options,
+                tasks=tasks
+            ))
 
         return processes
+
+
     else:
         raise ValueError(f"Unknown scenario: {scenario}")
 
@@ -536,10 +694,11 @@ def process_function(l: float, scenario: str):
 # ========================================
 ARRIVAL_RATES = [0.28]#, 0.2, 0.3, 0.5]  # Batches per minute (adjust to your demand)
 SCENARIO_NAMES = [
-    'actuator_manufacturing_with_rework'#,
-    #'actuator_manufacturing_no_rework'    
+    #'actuator_manufacturing_with_rework',
+    'actuator_manufacturing_no_rework'    
     #'actuator_mfg_pooledM_dedicatedA1_with_rework'
     # 'actuator_mfg_pooledM_dedicatedA1_no_rework',
+    #'all_dedicated_sticky_with_rework'
   # For comparison
 ]
 SIMULATION_RUN_TIME = 30000  # 48 hours in minutes (2 shifts)
