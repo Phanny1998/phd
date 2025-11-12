@@ -7,6 +7,19 @@ import random
 import math
 
 
+# --- Router key helpers (keep in one place) ---
+LANE_KEYS = {"moulding_lane", "mould_lane", "a1_lane", "a2_lane", "pack_lane", "sort_lane", "insp_lane"}
+TRIVIAL_KEYS = {"always"}
+
+def _is_qc_key(k: str) -> bool:
+    return k.startswith("qc_")
+
+def _is_lane_key(k: str) -> bool:
+    return k in LANE_KEYS
+
+def _is_trivial_router(k: str) -> bool:
+    return k in TRIVIAL_KEYS
+
 # -----------------------------
 # Core data structures
 # -----------------------------
@@ -44,7 +57,7 @@ class Gateway:
         merge_from: Optional[List[str]] = None,
     ):
         self.name = name
-        self.gateway_type = gateway_type  # "AND" or "XOR"
+        self.gateway_type = (gateway_type or "").upper().strip()  # <-- normalize here
         self.conditions = conditions or []
         self.next_tasks = next_tasks or []     # for split
         self.merge_from = merge_from or []     # for join
@@ -173,6 +186,7 @@ class SimpleProcess(Process):
         self.completed_tasks: Dict[int, set] = dict()
         self.reset_all_process_parameter()
 
+        self._validate_structures()
     # --- internals: resources ---
 
     def _extract_resources_unique(self) -> Dict[str, Resource]:
@@ -200,6 +214,22 @@ class SimpleProcess(Process):
                             canon = r
                         canon_list.append(canon)
                     node.resources = canon_list
+    def _validate_structures(self):
+        for pname, proc in self.process_definitions.items():
+            # next_tasks must exist
+            for label, node in proc.tasks.items():
+                for nxt in getattr(node, "next_tasks", []):
+                    if nxt not in proc.tasks:
+                        raise KeyError(f"[{pname}] '{label}' -> next '{nxt}' not found in tasks")
+
+            # XOR must have a condition present in data_options
+            for label, node in proc.tasks.items():
+                if isinstance(node, Gateway) and node.gateway_type == "XOR":
+                    if not node.conditions:
+                        raise ValueError(f"[{pname}] XOR '{label}' missing conditions[]")
+                    cond = node.conditions[0]
+                    if cond not in proc.data_options:
+                        raise KeyError(f"[{pname}] XOR '{label}' expects data_options['{cond}']")
 
     # --- resets/arrivals ---
 
@@ -258,20 +288,12 @@ class SimpleProcess(Process):
 
     def generate_case_data(self, data_options: Dict[str, Dict[str, float]]) -> Dict:
         case_data: Dict[str, str] = {}
-        # router keys are set by the simulator at first start (do NOT pre-sample here)
-        SKIP_KEYS = {
-            "moulding_lane",  # used by your pooled scenario
-            "mould_lane",     # used by the new dedicated scenario
-            "a1_lane",
-            "a2_lane",
-            "pack_lane",
-            "always"          # trivial router helper
-        }
+        # Router keys are set later (by XOR at runtime) to enable stickiness; skip them here.
         for key, value_probs in data_options.items():
-            if key.startswith("qc_") or key in SKIP_KEYS:
+            if _is_qc_key(key) or _is_lane_key(key) or _is_trivial_router(key):
                 continue
             values = list(value_probs.keys())
-            probs = list(value_probs.values())
+            probs  = list(value_probs.values())
             case_data[key] = random.choices(values, weights=probs, k=1)[0]
         return case_data
 
@@ -335,7 +357,7 @@ class SimpleProcess(Process):
 
                 attr = current_node.conditions[0]
                 case_data_for_case = self.case_data.get(case_id, {})
-                is_qc_key = attr.startswith("qc_")
+                is_qc_key = _is_qc_key(attr)
 
                 # If case data already specifies the route and it's valid, honor it.
                 if (not is_qc_key
@@ -359,10 +381,11 @@ class SimpleProcess(Process):
                 # --- NEW: write lane key at routing time if not already set (sticky fallback) ---
                 # Only for lane routers (not QC keys). This records the chosen lane once so
                 # subsequent loops stick to the same lane and the log shows the lane in `data`.
-                if not is_qc_key and attr in {"mould_lane", "a1_lane", "a2_lane", "pack_lane"}:
+                if not is_qc_key and _is_lane_key(attr):
                     cd = self.case_data.get(case_id, {})
                     if attr not in cd:
                         self.add_data(process_element, {attr: chosen_label})
+
             # -------------------------------------------------------------------------------
 
                 next_node = process_structure.tasks[chosen_label]
@@ -433,21 +456,19 @@ class SimpleProcess(Process):
         Sample service time for the given task-resource pair.
         Currently uses an exponential distribution with the task/resource 'mean'.
         """
-        try:
-            proc = self.process_definitions[process_element.case_type]
-            node = proc.tasks[process_element.label]
-            if not isinstance(node, Task):
-                raise ValueError(f"processing_time_sample called on non-Task label '{process_element.label}'")
+        proc = self.process_definitions[process_element.case_type]
+        node = proc.tasks[process_element.label]
+        if not isinstance(node, Task):
+            raise ValueError(f"processing_time_sample called on non-Task label '{process_element.label}'")
 
-            # Find THIS task's distribution for THIS resource name
-            for r in node.resources:
-                if r.name == resource.name:
-                    mean, std_dev = r.execution_distribution
-                    # Exponential with mean
-                    return random.expovariate(1.0 / mean)
+        for r in node.resources:
+            if r.name == resource.name:
+                mean, _std_dev = r.execution_distribution
+                return random.expovariate(1.0 / mean)
 
-            raise ValueError(f"No distribution found for resource '{resource.name}' on task '{process_element.label}'")
-        except Exception as e:
-            print(f"[WARN] processing_time_sample error: {e}; returning 0.0")
-            return 0.0
+        raise ValueError(
+            f"No distribution for resource '{resource.name}' on task '{process_element.label}' "
+            f"(case_type='{process_element.case_type}')."
+        )
+
 

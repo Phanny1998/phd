@@ -9,12 +9,13 @@ from tqdm import tqdm
 
 from myproject251110.processes import SimpleProcess, Task, Resource, ProcessElement
 from myproject251110.config import (
-    ARRIVAL_RATES,
-    SCENARIO_NAMES,
-    SIMULATION_RUN_TIME,
-    process_function,
-    SIMULATION_RUNS,
+    ARRIVAL_RATES, SCENARIO_NAMES, SIMULATION_RUN_TIME, SIMULATION_RUNS,
+    process_function,                     # keep legacy scenarios
+    process_function_experiment,          # <-- new
+    QUEUE_STYLES, COUNT_PRESETS, VARIANT_COUNTS, ACTIVITY_TOTALS,
+    QC_PASS_LEVELS, HET_MULTIPLIERS       # <-- new (menus)
 )
+
 from myproject251110.simulator import Simulator
 
 RUN_TAG  = "251110"
@@ -210,31 +211,117 @@ def run_fifo_simulation(args):
     return df, runtime_seconds, run_id
 
 
+
+
+def run_fifo_experiment(args):
+    (l, queue_style, variant_count, count_preset_key,
+     activity_total, qc_pass, hetero_key, run_id) = args
+
+    processes = process_function_experiment(
+        l=l,
+        queue_style=queue_style,
+        variant_count=variant_count,
+        count_preset_key=count_preset_key,
+        activity_total=activity_total,
+        qc_pass=qc_pass,
+        hetero_key=hetero_key,
+        station_styles=None,   # or pass an override dict if you want
+    )
+
+    allocator = FIFO(processes)
+    start_time = time.time()
+    simulator = Simulator(
+        simulation_run=run_id,
+        process=allocator,
+        scenario_name=f"EXP_{queue_style}_{count_preset_key}",
+        log_only_case_completion=False,
+        is_training=False,
+        seed=run_id,
+    )
+    simulator.run(SIMULATION_RUN_TIME)
+    runtime_seconds = time.time() - start_time
+
+    df = simulator.event_log.get_dataframe()
+    df["run"] = run_id
+    df["l"] = l
+    df["scenario"] = "experiment"
+    df["method"] = allocator.allocation_method_name
+    # record factors for later analysis
+    df["queue_style"] = queue_style
+    df["variant_count"] = variant_count
+    df["count_preset"] = count_preset_key
+    df["activity_total"] = activity_total
+    df["qc_pass"] = qc_pass
+    df["hetero"] = hetero_key
+
+    return df, runtime_seconds, run_id
+
 if __name__ == "__main__":
     mp.set_start_method("spawn", force=True)
+
+    # Flip this to choose which runner to use
+    USE_EXPERIMENTS = True
 
     runtime_csv_path = f"{OUT_ROOT}/runtime/FIFO_runtimes.csv"
     if not os.path.exists(runtime_csv_path):
         with open(runtime_csv_path, "w") as f:
             f.write("method,l,run,time\n")
 
-    for l in ARRIVAL_RATES:
-        for scenario_name in SCENARIO_NAMES:
-            print(f"\n=== Running FIFO: scenario={scenario_name}, λ={l} ===")
+    if not USE_EXPERIMENTS:
+        # ------- legacy scenarios (unchanged) -------
+        for l in ARRIVAL_RATES:
+            for scenario_name in SCENARIO_NAMES:
+                print(f"\n=== Running FIFO: scenario={scenario_name}, λ={l} ===")
+                args_list = [(l, scenario_name, i) for i in range(SIMULATION_RUNS)]
+                pool_size = min(max(1, mp.cpu_count() - 1), SIMULATION_RUNS, 8)
+                with mp.Pool(processes=pool_size) as pool:
+                    results = list(tqdm(pool.imap(run_fifo_simulation, args_list), total=len(args_list)))
 
-            args_list = [(l, scenario_name, i) for i in range(SIMULATION_RUNS)]
-            pool_size = min(max(1, mp.cpu_count() - 1), SIMULATION_RUNS, 8)
+                combined_logs = []
+                for df, runtime_seconds, run_id in results:
+                    combined_logs.append(df)
+                    with open(runtime_csv_path, "a") as f:
+                        f.write(f"FIFO,{l},{run_id},{runtime_seconds:.2f}\n")
 
-            with mp.Pool(processes=pool_size) as pool:
-                results = list(tqdm(pool.imap(run_fifo_simulation, args_list), total=len(args_list)))
+                combined_df = pd.concat(combined_logs, ignore_index=True)
+                result_filename = f"{OUT_ROOT}/results/FIFO_l{l}_{scenario_name}.csv"
+                combined_df.to_csv(result_filename, index=False)
+                print(f"Saved results to {result_filename}")
 
-            combined_logs = []
-            for df, runtime_seconds, run_id in results:
-                combined_logs.append(df)
-                with open(runtime_csv_path, "a") as f:
-                    f.write(f"FIFO,{l},{run_id},{runtime_seconds:.2f}\n")
+    else:
+        # ------- factorized experiments (small grid to verify) -------
+        styles   = ["pooled"]#, "hybrid30", "dedicated"]
+        counts   = ["C1"]      # try ["C1","C2"] later
+        variants = [18]        # e.g., 6/18/36
+        acts     = [8]         # e.g., 5/8/12/16/...
+        qc_lvls  = [0.97]      # try 0.99/0.97/0.95
+        hets     = ["identical", "mild_all"]  # or "mild_all", "strong_A1"
 
-            combined_df = pd.concat(combined_logs, ignore_index=True)
-            result_filename  = f"{OUT_ROOT}/results/FIFO_l{l}_{scenario_name}.csv"
-            combined_df.to_csv(result_filename, index=False)
-            print(f"Saved results to {result_filename}")
+        for l in ARRIVAL_RATES:
+            for style in styles:
+                for ckey in counts:
+                    for vcnt in variants:
+                        for atot in acts:
+                            for qcp in qc_lvls:
+                                for hk in hets:
+                                    print(f"\n=== FIFO EXP: λ={l} style={style} counts={ckey} "
+                                          f"variants={vcnt} activities={atot} qc={qcp} het={hk} ===")
+
+                                    args_list = [(l, style, vcnt, ckey, atot, qcp, hk, i)
+                                                 for i in range(SIMULATION_RUNS)]
+                                    pool_size = min(max(1, mp.cpu_count() - 1), SIMULATION_RUNS, 8)
+                                    with mp.Pool(processes=pool_size) as pool:
+                                        results = list(tqdm(pool.imap(run_fifo_experiment, args_list),
+                                                            total=len(args_list)))
+
+                                    combined_logs = []
+                                    for df, runtime_seconds, run_id in results:
+                                        combined_logs.append(df)
+                                        with open(runtime_csv_path, "a") as f:
+                                            f.write(f"FIFO,{l},{run_id},{runtime_seconds:.2f}\n")
+
+                                    combined_df = pd.concat(combined_logs, ignore_index=True)
+                                    fname = (f"{OUT_ROOT}/results/FIFO_EXP_l{l}_"
+                                             f"{style}_{ckey}_V{vcnt}_A{atot}_QC{int(qcp*100)}_{hk}.csv")
+                                    combined_df.to_csv(fname, index=False)
+                                    print(f"Saved results to {fname}")

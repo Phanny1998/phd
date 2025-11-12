@@ -48,34 +48,29 @@ class SimulationItem:
 
 
 class EventLog:
-    def __init__(
-        self,
-        run_id: int,
-        scenario_name: str,
-        allocation_method: str = "default",
-        log_only_case_completion: bool = False,
-        is_training: bool = False,
-    ):
+    def __init__(self, run_id: int, scenario_name: str,
+                 allocation_method: str = "default",
+                 log_only_case_completion: bool = False,
+                 is_training: bool = False):
         self.is_training = is_training
 
-        # >>> NEW: write under out/251110/...
         RUN_TAG  = "251110"
         OUT_ROOT = f"out/{RUN_TAG}"
         log_dir  = f"{OUT_ROOT}/event_logs/train" if self.is_training else f"{OUT_ROOT}/event_logs/test"
         os.makedirs(log_dir, exist_ok=True)
-        # <<<
 
         self.log_only_case_completion = log_only_case_completion
-        self.filename = os.path.join(
-            log_dir, f"log_{allocation_method}_run{run_id}_{scenario_name}.csv"
-        )
+        self.filename = os.path.join(log_dir, f"log_{allocation_method}_run{run_id}_{scenario_name}.csv")
+
         self.fields = [
             "method","num_processes","simulation_run","timestamp","process","l",
-            "status","case_id","activity","resource","end_time","cycle_time","data",
+            "status","case_id","activity","resource","end_time","cycle_time","data","queue_start"
         ]
+
         with open(self.filename, mode="w", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=self.fields)
             writer.writeheader()
+
         # in myproject251110/simulator.py, inside class EventLog
     def get_dataframe(self):
         return pd.read_csv(self.filename)
@@ -98,7 +93,7 @@ class Simulator:
         scenario_name: str = "default",
         log_only_case_completion: bool = False,
         is_training: bool = False,
-        seed: Optional[int] = None,
+        seed: Optional[int] = None
     ):
         """
         simulation_run: integer run id
@@ -126,6 +121,10 @@ class Simulator:
         self.busy_cases: Dict[int, List[ProcessElement]] = {}
         self.finalized_cases: int = 0
         self.total_cycle_time: float = 0.0
+        
+
+        # NEW: map each task id to its case id (for proper cleanup)
+        self.task_to_case: Dict[int, int] = {}
 
         allocation_method = getattr(process, "allocation_method_name", "default")
         self.event_log = EventLog(
@@ -215,9 +214,10 @@ class Simulator:
             process=process_element.case_type,
             l=self.process.arrival_distributions[process_element.case_type],
             status="START",
-            case_id=cid,
+            case_id=process_element.case_id,
             activity=process_element.label,
-            data=self.process.case_data[process_element.case_id],
+            data=self.process.case_data.get(process_element.case_id, {}),
+
         )
 
     def handle_complete_event(self, process_element: ProcessElement):
@@ -242,7 +242,8 @@ class Simulator:
                     status="gateway",
                     case_id=process_element.case_id,
                     activity=process_element.label,
-                    data=self.process.case_data[process_element.case_id],
+                    data=self.process.case_data.get(process_element.case_id, {}),
+            
                 )
 
         for nxt in next_elements:
@@ -432,10 +433,13 @@ class Simulator:
             )
         elif process_element.is_task():
             self.unassigned_tasks[process_element.id] = process_element
+            self.task_to_case[process_element.id] = process_element.case_id
+
             if not hasattr(self.process, "task_first_ready_time"):
                 self.process.task_first_ready_time = {}
             self.process.task_first_ready_time.setdefault(process_element.id, self.now)
-            # Log true station-arrival (queue) time
+
+            # ⬇️ Log the queue entry *right here* with queue_start
             self.event_log.log_event(
                 method=self.process.allocation_method_name,
                 num_processes=len(self.process.case_types),
@@ -446,7 +450,9 @@ class Simulator:
                 status="queued",
                 case_id=process_element.case_id,
                 activity=process_element.label,
-)
+                data=self.process.case_data.get(process_element.case_id, {}),
+                queue_start=self.process.task_first_ready_time.get(process_element.id, self.now),
+            )
 
             self.schedule_event(
                 self.now,
@@ -465,13 +471,17 @@ class Simulator:
             self.process.completed_tasks.pop(case_id, None)
         if hasattr(self.process, "last_task_completion_time"):
             self.process.last_task_completion_time.pop(case_id, None)
-        if hasattr(self.process, "task_first_ready_time"):
-            for k in [k for k in list(self.process.task_first_ready_time.keys()) if self.get_case_id_from_task_id(k) == case_id]:
-                self.process.task_first_ready_time.pop(k, None)
-        if hasattr(self.process, "task_postpone_count"):
-            for k in [k for k in list(self.process.task_postpone_count.keys()) if self.get_case_id_from_task_id(k) == case_id]:
-                self.process.task_postpone_count.pop(k, None)
+                # --- NEW: remove all per-task state for tasks that belong to this case ---
+        if hasattr(self, "task_to_case"):
+            # collect all task ids that map to this case
+            tids = [tid for tid, cid in list(self.task_to_case.items()) if cid == case_id]
+            for tid in tids:
+                self.task_to_case.pop(tid, None)
+                if hasattr(self.process, "task_first_ready_time"):
+                    self.process.task_first_ready_time.pop(tid, None)
+                if hasattr(self.process, "task_postpone_count"):
+                    self.process.task_postpone_count.pop(tid, None)
+
 
     def get_case_id_from_task_id(self, task_id: int):
-        # not used in this setup
-        return None
+        return self.task_to_case.get(task_id)
