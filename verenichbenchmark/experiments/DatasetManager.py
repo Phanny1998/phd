@@ -25,16 +25,38 @@ class DatasetManager:
     
     def read_dataset(self):
         # read dataset
-        dtypes = {col:"object" for col in self.dynamic_cat_cols+self.static_cat_cols+[self.case_id_col, self.timestamp_col]}
+        dtypes = {
+            col: "object"
+            for col in (
+                self.dynamic_cat_cols
+                + self.static_cat_cols
+                + [self.case_id_col, self.timestamp_col]
+            )
+        }
         for col in self.dynamic_num_cols + self.static_num_cols:
             dtypes[col] = "float"
 
-        dtypes[self.label_col] = "float"  # remaining time should be float
+        # remaining time is numeric
+        dtypes[self.label_col] = "float"
 
-        data = pd.read_csv(dataset_confs.filename[self.dataset_name], sep=";", dtype=dtypes)
-        data[self.timestamp_col] = pd.to_datetime(data[self.timestamp_col])
+        data = pd.read_csv(
+            dataset_confs.filename[self.dataset_name],
+            sep=";",
+            dtype=dtypes,
+        )
+
+        # For real-life logs they used real timestamps.
+        # For our MuProMAC dataset, "Complete Timestamp" is already
+        # a numeric simulation clock (seconds). We keep it as float.
+        if self.dataset_name.startswith("mup_"):
+            # ensure float
+            data[self.timestamp_col] = data[self.timestamp_col].astype(float)
+        else:
+            # original behavior for the old datasets
+            data[self.timestamp_col] = pd.to_datetime(data[self.timestamp_col])
 
         return data
+
 
 
     def split_data(self, data, train_ratio):  

@@ -18,10 +18,12 @@ class PrefixLengthBucketer(object):
         return self
     
     
-    def predict(self, X, y=None):
-        
-        return X.groupby(self.case_id_col).size().as_matrix()
-    
+    def predict(self, X):
+        # group by case and count events → prefix length per case
+        lengths = X.groupby(self.case_id_col).size()
+        # convert to a 1D numpy array of ints
+        return lengths.to_numpy()
+
     
     def fit_predict(self, X, y=None):
         

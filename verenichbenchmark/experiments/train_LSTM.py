@@ -2,12 +2,13 @@
 
 import time
 from keras.models import Sequential, Model
-from keras.layers.core import Dense
-from keras.layers.recurrent import LSTM, GRU, SimpleRNN
+from keras.layers import Dense, LSTM, GRU, SimpleRNN, Input, BatchNormalization
+#from keras.layers.core import Dense
+#from keras.layers.recurrent import LSTM, GRU, SimpleRNN
 from keras.layers import Input
 from keras.optimizers import Nadam, RMSprop
 from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
-from keras.layers.normalization import BatchNormalization
+#from keras.layers.normalization import BatchNormalization
 import csv
 import os
 import sys
@@ -26,7 +27,7 @@ batch_size = int(argv[5])
 learning_rate = float(argv[6])
 activation = argv[7]
 optimizer = argv[8]
-nb_epoch = 500
+nb_epoch = 30
 
 train_ratio = 0.8
 val_ratio = 0.2
@@ -38,7 +39,8 @@ if not os.path.exists(os.path.join(home_dir, checkpoint_dir)):
     os.makedirs(os.path.join(home_dir, checkpoint_dir))
 
 checkpoint_prefix = os.path.join(home_dir, checkpoint_dir, "model_%s_%s_%s_%s_%s_%s_%s"%(lstmsize, dropout, n_layers, batch_size, activation, optimizer, learning_rate))
-checkpoint_filepath = "%s.{epoch:02d}-{val_loss:.2f}.hdf5" % checkpoint_prefix
+#checkpoint_filepath = "%s.{epoch:02d}-{val_loss:.2f}.hdf5" % checkpoint_prefix
+checkpoint_filepath = "%s.{epoch:02d}-{val_loss:.2f}.weights.h5" % checkpoint_prefix
 
 ##### MAIN PART ###### 
 
@@ -95,20 +97,45 @@ elif n_layers == 3:
 outcome_output = Dense(1, activation=activation, kernel_initializer='glorot_uniform', name='outcome_output')(b2_3)
 
 model = Model(inputs=[main_input], outputs=[outcome_output])
+# Keras 3 / TF 2.x: use `learning_rate` instead of `lr`,
+# and drop deprecated args like `decay` / `schedule_decay`.
 if optimizer == "adam":
-    opt = Nadam(lr=learning_rate, beta_1=0.9, beta_2=0.999, epsilon=1e-08, schedule_decay=0.004, clipvalue=3)
+    # In the original code they actually use Nadam when you say "adam"
+    opt = Nadam(learning_rate=learning_rate, clipvalue=3.0)
 elif optimizer == "rmsprop":
-    opt = RMSprop(lr=learning_rate, rho=0.9, epsilon=1e-08, decay=0.0)
+    opt = RMSprop(learning_rate=learning_rate)
+else:
+    raise ValueError(f"Unknown optimizer: {optimizer}")
 
-model.compile(loss={'outcome_output':'mean_absolute_error'}, optimizer=opt)
+#model.compile(loss={'outcome_output':'mean_absolute_error'}, optimizer=opt)
+model.compile(loss='mean_absolute_error', optimizer=opt)
 early_stopping = EarlyStopping(monitor='val_loss', patience=42)
 model_checkpoint = ModelCheckpoint(checkpoint_filepath, monitor='val_loss', verbose=0, save_best_only=True, save_weights_only=True, mode='auto')
-lr_reducer = ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=10, verbose=0, mode='auto', epsilon=0.0001, cooldown=0, min_lr=0)
+#lr_reducer = ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=10, verbose=0, mode='auto', epsilon=0.0001, cooldown=0, min_lr=0)
+lr_reducer = ReduceLROnPlateau(
+    monitor='val_loss',
+    factor=0.5,
+    patience=10,
+    verbose=1,
+    mode='auto',
+    min_delta=0.0001,  # was `epsilon` in old Keras
+    cooldown=0,
+    min_lr=0.0,
+)
 
 X, y_o = dataset_manager.generate_LSTM_data(dt_train, max_prefix_length)
 X_val, y_o_val = dataset_manager.generate_LSTM_data(dt_val, max_prefix_length)
 
 sys.stdout.flush()
-history = model.fit({'main_input': X}, {'outcome_output':y_o}, validation_data=(X_val, y_o_val), verbose=2, callbacks=[early_stopping, model_checkpoint, lr_reducer], batch_size=batch_size, epochs=nb_epoch)
+#history = model.fit({'main_input': X}, {'outcome_output':y_o}, validation_data=(X_val, y_o_val), verbose=2, callbacks=[early_stopping, model_checkpoint, lr_reducer], batch_size=batch_size, epochs=nb_epoch)
+history = model.fit(
+    X,
+    y_o,
+    validation_data=(X_val, y_o_val),
+    verbose=2,
+    callbacks=[early_stopping, model_checkpoint, lr_reducer],
+    batch_size=batch_size,
+    epochs=nb_epoch
+)
 
 print("Done: %s"%(time.time() - start))

@@ -28,16 +28,23 @@ class DatasetManager:
 
     def read_dataset(self):
         # read dataset
-        dtypes = {col: "object" for col in self.dynamic_cat_cols + self.static_cat_cols + [self.case_id_col, self.timestamp_col]}
+        dtypes = {col: "object" for col in self.dynamic_cat_cols + self.static_cat_cols +
+                                    [self.case_id_col, self.timestamp_col]}
         for col in self.dynamic_num_cols + self.static_num_cols:
             dtypes[col] = "float"
 
         dtypes[self.label_col] = "float"  # remaining time should be float
 
         data = pd.read_csv(dataset_confs.filename[self.dataset_name], sep=";", dtype=dtypes)
-        data[self.timestamp_col] = pd.to_datetime(data[self.timestamp_col])
+
+        # MuProMAC logs: timestamp is already numeric simulation time
+        if self.dataset_name.startswith("mup_"):
+            data[self.timestamp_col] = data[self.timestamp_col].astype(float)
+        else:
+            data[self.timestamp_col] = pd.to_datetime(data[self.timestamp_col])
 
         return data
+
 
 
     def split_data(self, data, train_ratio):
@@ -144,7 +151,8 @@ class DatasetManager:
         for _, group in grouped:
             group = group.sort_values(self.timestamp_col, ascending=True, kind="mergesort")
             label = group[self.label_col]
-            group = group.as_matrix()
+            #group = group.as_matrix()
+            group = group.to_numpy()
             for i in range(1, len(group) + 1):
                 X[idx] = pad_sequences(group[np.newaxis, :i, :-3], maxlen=max_len, dtype=np.float64)
                 y_o[idx] = label.iloc[i - 1]
@@ -173,7 +181,8 @@ class DatasetManager:
                 continue
             group = group.sort_values(self.timestamp_col, ascending=True, kind="mergesort")
             label = group[self.label_col].iloc[nr_events - 1]
-            group = group.as_matrix()
+            #group = group.as_matrix()
+            group = group.to_numpy()
             X[idx] = pad_sequences(group[np.newaxis, :nr_events, :-3], maxlen=max_len, dtype=np.float64)
 
             y_o[idx] = label

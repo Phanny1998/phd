@@ -2,12 +2,13 @@
 
 import time
 from keras.models import Sequential, Model
-from keras.layers.core import Dense
-from keras.layers.recurrent import LSTM, GRU, SimpleRNN
+#from keras.layers.core import Dense
+#from keras.layers.recurrent import LSTM, GRU, SimpleRNN
 from keras.layers import Input
 from keras.optimizers import Nadam, RMSprop
 from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
-from keras.layers.normalization import BatchNormalization
+#from keras.layers.normalization import BatchNormalization
+from keras.layers import Dense, LSTM, GRU, SimpleRNN, BatchNormalization
 import csv
 from sklearn.metrics import f1_score, accuracy_score, log_loss
 from sklearn.metrics import mean_absolute_error, mean_squared_error
@@ -40,11 +41,25 @@ results_dir = "../results/"
 detailed_results_dir = "../results/detailed/"
 checkpoint_dir = "../results/chkpnt_%s" % dataset_ref
 
-checkpoint_prefix = os.path.join(home_dir, checkpoint_dir, "model_%s_%s_%s_%s_%s_%s_%s"%(lstmsize, dropout, n_layers, batch_size, activation, optimizer, learning_rate))
-checkpoint_filepath = "%s.{epoch:02d}-{val_loss:.2f}.hdf5" % checkpoint_prefix
+# checkpoint_prefix = os.path.join(home_dir, checkpoint_dir, "model_%s_%s_%s_%s_%s_%s_%s"%(lstmsize, dropout, n_layers, batch_size, activation, optimizer, learning_rate))
+# checkpoint_filepath = "%s.{epoch:02d}-{val_loss:.2f}.hdf5" % checkpoint_prefix
 
-model_filename = glob.glob("%s*.hdf5"%checkpoint_prefix)[-1]
+# model_filename = glob.glob("%s*.hdf5"%checkpoint_prefix)[-1]
+# print(model_filename)
+checkpoint_prefix = os.path.join(
+    home_dir,
+    checkpoint_dir,
+    "model_%s_%s_%s_%s_%s_%s_%s" % (
+        lstmsize, dropout, n_layers, batch_size, activation, optimizer, learning_rate
+    )
+)
+# this variable isn't actually used in this script, but you can update it if you like
+checkpoint_filepath = "%s.{epoch:02d}-{val_loss:.2f}.weights.h5" % checkpoint_prefix
+
+# IMPORTANT: now look for .weights.h5 instead of .hdf5
+model_filename = glob.glob("%s*.weights.h5" % checkpoint_prefix)[-1]
 print(model_filename)
+
 outfile = os.path.join(home_dir, results_dir, "final_results_%s_%s_%s_%s_%s_%s_%s_%s_%s.csv" % (
     cls_method, dataset_ref, lstmsize, dropout, n_layers, batch_size, activation, optimizer, learning_rate))
 detailed_results_file = os.path.join(home_dir, detailed_results_dir, "detailed_%s_%s_%s_%s_%s_%s_%s_%s_%s.csv" % (
@@ -107,13 +122,29 @@ elif n_layers == 3:
 
 outcome_output = Dense(1, activation=activation, kernel_initializer='glorot_uniform', name='outcome_output')(b2_3)
 
-model = Model(inputs=[main_input], outputs=[outcome_output])
-if optimizer == "adam":
-    opt = Nadam(lr=learning_rate, beta_1=0.9, beta_2=0.999, epsilon=1e-08, schedule_decay=0.004, clipvalue=3)
-elif optimizer == "rmsprop":
-    opt = RMSprop(lr=learning_rate, rho=0.9, epsilon=1e-08, decay=0.0)
+# model = Model(inputs=[main_input], outputs=[outcome_output])
+# if optimizer == "adam":
+#     opt = Nadam(lr=learning_rate, beta_1=0.9, beta_2=0.999, epsilon=1e-08, schedule_decay=0.004, clipvalue=3)
+# elif optimizer == "rmsprop":
+#     opt = RMSprop(lr=learning_rate, rho=0.9, epsilon=1e-08, decay=0.0)
 
-model.compile(loss={'outcome_output':'mean_absolute_error'}, optimizer=opt)
+# model.compile(loss={'outcome_output':'mean_absolute_error'}, optimizer=opt)
+# model.load_weights(model_filename)
+model = Model(inputs=[main_input], outputs=[outcome_output])
+
+# Keras 3 / TF 2.x: same optimizer fix as in train_LSTM.py
+if optimizer == "adam":
+    # they used Nadam when "adam" is passed
+    opt = Nadam(learning_rate=learning_rate, clipvalue=3.0)
+elif optimizer == "rmsprop":
+    opt = RMSprop(learning_rate=learning_rate)
+else:
+    raise ValueError(f"Unknown optimizer: {optimizer}")
+
+# model.compile(loss={'outcome_output': 'mean_absolute_error'}, optimizer=opt)
+# model.load_weights(model_filename)
+
+model.compile(loss='mean_absolute_error', optimizer=opt)
 model.load_weights(model_filename)
 
 print('Evaluating...')
