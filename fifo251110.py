@@ -290,7 +290,7 @@ if __name__ == "__main__":
 
     else:
         # ------- factorized experiments (small grid to verify) -------
-        styles   = ["pooled"]#, "hybrid30", "dedicated"]
+        styles   = ["pooled", "hybrid30", "dedicated"]
         counts   = ["C1"]      # try ["C1","C2"] later
         variants = [18]        # e.g., 6/18/36
         acts     = [8]         # e.g., 5/8/12/16/...
