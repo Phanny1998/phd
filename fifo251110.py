@@ -292,8 +292,8 @@ if __name__ == "__main__":
         # ------- factorized experiments (small grid to verify) -------
         styles   = ["pooled", "hybrid30", "dedicated"]
         counts   = ["C1"]      # try ["C1","C2"] later
-        variants = [18]        # e.g., 6/18/36
-        acts     = [8]         # e.g., 5/8/12/16/...
+        variants = [6, 18]        # e.g., 6/18/36
+        acts     = [5, 8]         # e.g., 5/8/12/16/...
         qc_lvls  = [0.97]      # try 0.99/0.97/0.95
         hets     = ["identical", "mild_all"]  # or "mild_all", "strong_A1"
 
