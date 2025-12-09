@@ -292,10 +292,10 @@ if __name__ == "__main__":
         # ------- factorized experiments (small grid to verify) -------
         styles   = ["pooled", "hybrid30", "dedicated"]
         counts   = ["C1"]      # try ["C1","C2"] later
-        variants = [6, 18]        # e.g., 6/18/36
-        acts     = [5, 8]         # e.g., 5/8/12/16/...
-        qc_lvls  = [0.97]      # try 0.99/0.97/0.95
-        hets     = ["identical", "mild_all"]  # or "mild_all", "strong_A1"
+        variants = [6]        # e.g., 6/18/36
+        acts     = [5, 8, 12]         # e.g., 5/8/12/16/...
+        qc_lvls  = [1.0, 0.7, 0.5]      # try 0.99/0.97/0.95
+        hets     = ["strong_all", "mild_all", "identical"]  # or "mild_all", "strong_A1"
 
         for l in ARRIVAL_RATES:
             for style in styles:

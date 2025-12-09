@@ -1,4 +1,3 @@
-# NEW
 from __future__ import annotations
 from myproject251110.processes import ProcessStructure, Task, Resource, Gateway
 import random
@@ -23,21 +22,135 @@ COUNT_PRESETS = {
 }
 
 # Heterogeneity (multiplies *means*; 1.0 = identical)
-HET_MULTIPLIERS = {
-    "identical": {},
-    "mild_all": {
-        "MOULDING":[0.95,1.00,1.05,1.00,1.00],
-        "A1":[0.90,1.00,1.10,1.00,1.00],
-        "A2":[0.95,1.05],
-        "SORTING":[1.00],
-        "PACKAGING":[0.95,1.00,1.05],
-    },
-    "strong_A1": {
-        "A1":[0.80,0.90,1.00,1.10,1.20],
-    }
+# HET_MULTIPLIERS = {
+#     "identical": {},
+#     "mild_all": {
+#         "MOULDING":[0.95,1.00,1.05,1.00,1.00],
+#         "A1":[0.90,1.00,1.10,1.00,1.00],
+#         "A2":[0.95,1.05],
+#         "SORTING":[1.00],
+#         "PACKAGING":[0.95,1.00,1.05],
+#     },
+#     "strong_A1": {
+#         "A1":[0.80,0.90,1.00,1.10,1.20],
+#     }
+# }
+
+# ==============================
+# Heterogeneity helpers
+# ==============================
+
+def normalize_time_multipliers(shape):
+    """
+    shape: list of positive numbers (time multipliers, <1 = faster, >1 = slower)
+
+    Returns a new list m such that:
+      - m_i = alpha * shape_i
+      - sum(1/m_i) = len(shape)     # => same total station capacity as identical case
+    """
+    k = len(shape)
+    S = sum(1.0 / x for x in shape)
+    alpha = S / k
+    return [alpha * x for x in shape]
+
+# Raw SHAPES you can tweak freely later
+# (these are BEFORE normalisation; they just express "who is faster/slower")
+
+SHAPES_MILD = {
+    # 5 machines: 2 slightly slow, 2 slightly fast, 1 neutral
+    "MOULDING":   [1.1, 1.1, 0.9, 0.9, 1.0],
+    # 5 machines: 2 slightly slow, 3 slightly fast
+    "A1":         [1.1, 1.1, 0.9, 0.9, 0.9],
+    # 2 machines: 1 slow, 1 fast
+    "A2":         [1.1, 0.9],
+    # 1 machine: no heterogeneity anyway
+    "SORTING":    [1.0],
+    # 3 machines: 1 slow, 1 neutral, 1 fast
+    "PACKAGING":  [1.1, 1.0, 0.9],
+    # INSPECTION: assume 2 lanes in the “shape”; if you actually run with 1 lane,
+    # the first entry will be used; extra lanes stay base.
+    "INSPECTION": [1.1, 0.9],
 }
 
-QC_PASS_LEVELS = [0.99, 0.97, 0.95]  # pass prob at each QC
+# Strong heterogeneity only at A1 (2 fast, 3 slow, all slightly different allowed)
+SHAPES_STRONG_A1 = {
+    "A1": [1.4, 1.3, 0.85, 0.9, 1.0],   # you can change this pattern later
+}
+
+# Strong heterogeneity everywhere (clustered: a couple fast, majority slow)
+SHAPES_STRONG_ALL = {
+    "MOULDING":   [1.4, 1.3, 0.8, 0.8, 0.9],
+    "A1":         [1.5, 1.4, 0.8, 0.9, 1.0],   # stronger spread at the bottleneck
+    "A2":         [1.3, 0.85],
+    "SORTING":    [1.0],                      # just keep it neutral if you want
+    "PACKAGING":  [1.5, 1.3, 0.85],
+    "INSPECTION": [1.4, 1.3, 0.8],
+}
+
+# ==============================
+# Final HET_MULTIPLIERS (time multipliers on means)
+# ==============================
+
+def _build_het_multipliers():
+    # 0) Baseline – all machines identical
+    multipliers = {
+        "identical": {},
+    }
+
+    # 1) Mild clustered differences everywhere
+    mild_all = {}
+    for station, shape in SHAPES_MILD.items():
+        mild_all[station] = normalize_time_multipliers(shape)
+    multipliers["mild_all"] = mild_all
+
+    # 2) Strong heterogeneity only at A1
+    strong_A1 = {}
+    for station, shape in SHAPES_STRONG_A1.items():
+        strong_A1[station] = normalize_time_multipliers(shape)
+    multipliers["strong_A1"] = strong_A1
+
+    # 3) Strong clustered heterogeneity at all stations
+    strong_all = {}
+    for station, shape in SHAPES_STRONG_ALL.items():
+        strong_all[station] = normalize_time_multipliers(shape)
+    multipliers["strong_all"] = strong_all
+
+    return multipliers
+
+
+HET_MULTIPLIERS = _build_het_multipliers()
+
+# HET_MULTIPLIERS = {
+#     # 0) Baseline – all machines identical
+#     "identical": {},
+
+#     # 1) Mild differences everywhere (small spread)
+#     "mild_all": {
+#         "MOULDING":   [0.9, 1.0, 1.1, 1.0, 1.0],   # 5 machines
+#         "A1":         [0.85, 1.0, 1.15, 1.0, 1.0],  # 5 machines
+#         "A2":         [0.9, 1.1],                   # 2 machines
+#         "SORTING":    [1.0],                        # 1 machine
+#         "PACKAGING":  [0.9, 1.0, 1.1],             # 3 machines
+#         "INSPECTION": [0.9, 1.1],                  # 1–2+ machines ok; extra ones stay base
+#     },
+
+#     # 2) Strong heterogeneity only at A1
+#     "strong_A1": {
+#         "A1": [0.5, 0.8, 1.0, 1.3, 1.8],
+#     },
+
+#     # 3) Strong heterogeneity at all stations
+#     "strong_all": {
+#         "MOULDING":   [0.6, 0.9, 1.0, 1.2, 1.6],
+#         "A1":         [0.5, 0.8, 1.0, 1.3, 1.8],
+#         "A2":         [0.6, 1.6],
+#         "SORTING":    [1.0],
+#         "PACKAGING":  [0.6, 1.0, 1.8],
+#         "INSPECTION": [0.6, 1.0, 1.8],
+#     },
+# }
+
+QC_PASS_LEVELS = [0.99, 0.97, 0.95, 1.0, 0.7, 0.5]  # pass prob at each QC
 VARIANT_COUNTS = [6, 18, 36]         # # product classes per run
 
 # Keep your existing ARRIVAL_RATES list as-is. We’ll reuse it.
