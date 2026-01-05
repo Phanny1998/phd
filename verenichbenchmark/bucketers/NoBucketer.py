@@ -17,7 +17,7 @@ class NoBucketer(object):
     
     def predict(self, X, y=None):
         
-        return np.ones(len(X[self.case_id_col].unique()), dtype=np.int)
+        return np.ones(len(X[self.case_id_col].unique()), dtype=int)
     
     
     def fit_predict(self, X, y=None):

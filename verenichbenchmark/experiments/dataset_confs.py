@@ -1,4 +1,4 @@
-# dataset_confs.py
+'''# dataset_confs.py
 # Configuration for datasets used by time-prediction-benchmark.
 # Here we define ONE ENTRY PER SCENARIO, all with the same column layout.
 
@@ -57,5 +57,73 @@ dynamic_num_cols[dataset] = [
 ]
 
 # Static numeric features (fixed per case)
-static_num_cols[dataset] = []
+static_num_cols[dataset] = []'''
+
+# dataset_confs.py
+# Configuration for datasets used by time-prediction-benchmark.
+
+case_id_col = {}
+activity_col = {}
+timestamp_col = {}
+label_col = {}
+pos_label = {}
+neg_label = {}
+dynamic_cat_cols = {}
+static_cat_cols = {}
+dynamic_num_cols = {}
+static_num_cols = {}
+filename = {}
+
+# ----------------------------------------------------------------------
+# ORIGINAL DATASETS (keep these if you still want to use them)
+# ----------------------------------------------------------------------
+
+# ... your original bpic2011, bpic2015, etc. configurations ...
+
+# ----------------------------------------------------------------------
+# AUTO-CONFIGURE MuProMAC SCENARIOS
+# ----------------------------------------------------------------------
+
+import os
+import glob
+
+# CONTROL HOW MANY LOGS TO CONFIGURE
+# Set to None to configure ALL logs, or set a number (e.g., 10) to limit
+MAX_LOGS = 10  # Change this to None to process all 84 logs
+
+# Find all processed MuProMAC logs
+mupromac_logs = glob.glob("../../out/251110/event_logs_processed/*.csv")
+
+if not mupromac_logs:
+    # Try relative path from experiments folder
+    mupromac_logs = glob.glob("../out/251110/event_logs_processed/*.csv")
+
+# Sort for consistent ordering
+mupromac_logs = sorted(mupromac_logs)
+
+# Limit to first N logs if MAX_LOGS is set
+if MAX_LOGS is not None:
+    mupromac_logs = mupromac_logs[:MAX_LOGS]
+
+for log_path in mupromac_logs:
+    base_name = os.path.basename(log_path).replace(".csv", "")
+    dataset = f"mup_{base_name}"
+    
+    filename[dataset] = log_path
+    case_id_col[dataset] = "case_id"
+    activity_col[dataset] = "activity"
+    timestamp_col[dataset] = "Complete Timestamp"
+    label_col[dataset] = "remtime"
+    pos_label[dataset] = "regular"
+    neg_label[dataset] = "deviant"
+    dynamic_cat_cols[dataset] = ["activity", "resource"]
+    static_cat_cols[dataset] = []
+    dynamic_num_cols[dataset] = ["activity_duration", "timesincelastevent", "timesincecasestart", "event_nr", "open_cases"]
+    static_num_cols[dataset] = []
+
+# print(f"Auto-configured {len(mupromac_logs)} MuProMAC datasets")
+# if MAX_LOGS is not None:
+#     print(f"  (Limited to first {MAX_LOGS} logs - set MAX_LOGS=None to process all)")
+# if mupromac_logs:
+#     print(f"First dataset: {list(filename.keys())[0] if filename else 'None'}")
 
