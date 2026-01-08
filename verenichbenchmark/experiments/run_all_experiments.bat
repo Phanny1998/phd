@@ -27,7 +27,7 @@ set methods[2]=single index xgb
 set methods[3]=single combined xgb
 
 REM Count total methods
-set num_methods=4
+set num_methods=1
 
 REM Counter for processed scenarios
 set dataset_count=0
@@ -47,7 +47,7 @@ for /f "tokens=*" %%d in (temp_datasets.txt) do (
     echo.
     
     REM Loop through each method combination
-    for /L %%i in (0,1,3) do (
+    for /L %%i in (2,1,2) do (
         REM Parse method combination
         for /f "tokens=1,2,3" %%a in ("!methods[%%i]!") do (
             set bucket_method=%%a

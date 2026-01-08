@@ -109,7 +109,8 @@ with open(outfile, 'w') as fout:
                             'static_num_cols':dataset_manager.static_num_cols, 
                             'dynamic_cat_cols':dataset_manager.dynamic_cat_cols,
                             'dynamic_num_cols':dataset_manager.dynamic_num_cols, 
-                            'fillna':fillna}
+                            'fillna':fillna,
+                            'max_events': max_prefix_length}
         
         
         # Bucketing prefixes based on control flow
