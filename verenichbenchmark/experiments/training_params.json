@@ -3,37 +3,7 @@
       "single_agg": {
          "xgb": {
             "n_clusters": 1,
-            "n_estimators": 100,
-            "learning_rate": 0.06,
-            "subsample": 0.8,
-            "max_depth": 5,
-            "colsample_bytree": 0.6
-         }
-      },
-      "single_combined": {
-         "xgb": {
-            "n_clusters": 1,
             "n_estimators": 250,
-            "learning_rate": 0.02,
-            "subsample": 0.8,
-            "max_depth": 7,
-            "colsample_bytree": 0.9
-         }
-      },
-      "single_index": {
-         "xgb": {
-            "n_clusters": 1,
-            "n_estimators": 100,
-            "learning_rate": 0.02,
-            "subsample": 0.8,
-            "max_depth": 7,
-            "colsample_bytree": 0.9
-         }
-      },
-      "single_laststate": {
-         "xgb": {
-            "n_clusters": 1,
-            "n_estimators": 500,
             "learning_rate": 0.02,
             "subsample": 0.8,
             "max_depth": 5,
@@ -51,36 +21,6 @@
             "max_depth": 7,
             "colsample_bytree": 0.6
          }
-      },
-      "single_combined": {
-         "xgb": {
-            "n_clusters": 1,
-            "n_estimators": 100,
-            "learning_rate": 0.06,
-            "subsample": 0.8,
-            "max_depth": 7,
-            "colsample_bytree": 0.6
-         }
-      },
-      "single_index": {
-         "xgb": {
-            "n_clusters": 1,
-            "n_estimators": 250,
-            "learning_rate": 0.02,
-            "subsample": 0.8,
-            "max_depth": 7,
-            "colsample_bytree": 0.6
-         }
-      },
-      "single_laststate": {
-         "xgb": {
-            "n_clusters": 1,
-            "n_estimators": 500,
-            "learning_rate": 0.02,
-            "subsample": 0.8,
-            "max_depth": 5,
-            "colsample_bytree": 0.9
-         }
       }
    },
    "mup_FIFO_EXP_l0.28_dedicated_C1_V18_A8_QC97_identical": {
@@ -90,38 +30,8 @@
             "n_estimators": 250,
             "learning_rate": 0.02,
             "subsample": 0.8,
-            "max_depth": 7,
-            "colsample_bytree": 0.6
-         }
-      },
-      "single_combined": {
-         "xgb": {
-            "n_clusters": 1,
-            "n_estimators": 250,
-            "learning_rate": 0.02,
-            "subsample": 0.8,
-            "max_depth": 7,
-            "colsample_bytree": 0.6
-         }
-      },
-      "single_index": {
-         "xgb": {
-            "n_clusters": 1,
-            "n_estimators": 100,
-            "learning_rate": 0.06,
-            "subsample": 0.8,
             "max_depth": 5,
-            "colsample_bytree": 0.9
-         }
-      },
-      "single_laststate": {
-         "xgb": {
-            "n_clusters": 1,
-            "n_estimators": 500,
-            "learning_rate": 0.02,
-            "subsample": 0.8,
-            "max_depth": 5,
-            "colsample_bytree": 0.9
+            "colsample_bytree": 0.6
          }
       }
    },
@@ -129,41 +39,11 @@
       "single_agg": {
          "xgb": {
             "n_clusters": 1,
-            "n_estimators": 250,
-            "learning_rate": 0.02,
-            "subsample": 0.8,
-            "max_depth": 7,
-            "colsample_bytree": 0.6
-         }
-      },
-      "single_combined": {
-         "xgb": {
-            "n_clusters": 1,
             "n_estimators": 100,
             "learning_rate": 0.06,
             "subsample": 0.8,
             "max_depth": 5,
             "colsample_bytree": 0.6
-         }
-      },
-      "single_index": {
-         "xgb": {
-            "n_clusters": 1,
-            "n_estimators": 250,
-            "learning_rate": 0.02,
-            "subsample": 0.8,
-            "max_depth": 7,
-            "colsample_bytree": 0.9
-         }
-      },
-      "single_laststate": {
-         "xgb": {
-            "n_clusters": 1,
-            "n_estimators": 500,
-            "learning_rate": 0.02,
-            "subsample": 0.8,
-            "max_depth": 5,
-            "colsample_bytree": 0.9
          }
       }
    },
@@ -177,8 +57,10 @@
             "max_depth": 7,
             "colsample_bytree": 0.6
          }
-      },
-      "single_combined": {
+      }
+   },
+   "mup_FIFO_EXP_l0.28_dedicated_C1_V6_A12_QC100_mild_all": {
+      "single_agg": {
          "xgb": {
             "n_clusters": 1,
             "n_estimators": 250,
@@ -187,8 +69,190 @@
             "max_depth": 7,
             "colsample_bytree": 0.6
          }
-      },
-      "single_index": {
+      }
+   },
+   "mup_FIFO_EXP_l0.28_dedicated_C1_V6_A12_QC97_identical": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 250,
+            "learning_rate": 0.02,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.9
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_dedicated_C1_V6_A12_QC97_mild_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 250,
+            "learning_rate": 0.02,
+            "subsample": 0.8,
+            "max_depth": 7,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_dedicated_C1_V6_A12_QC99_identical": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 100,
+            "learning_rate": 0.06,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.9
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_dedicated_C1_V6_A12_QC99_mild_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 250,
+            "learning_rate": 0.02,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.9
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_dedicated_C1_V6_A5_QC100_identical": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 100,
+            "learning_rate": 0.06,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_dedicated_C1_V6_A5_QC100_mild_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 250,
+            "learning_rate": 0.02,
+            "subsample": 0.8,
+            "max_depth": 7,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_dedicated_C1_V6_A5_QC97_identical": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 500,
+            "learning_rate": 0.02,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_dedicated_C1_V6_A5_QC97_mild_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 100,
+            "learning_rate": 0.06,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.9
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_dedicated_C1_V6_A5_QC99_identical": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 100,
+            "learning_rate": 0.06,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_dedicated_C1_V6_A5_QC99_mild_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 250,
+            "learning_rate": 0.02,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_dedicated_C1_V6_A8_QC100_identical": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 100,
+            "learning_rate": 0.06,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_dedicated_C1_V6_A8_QC100_mild_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 250,
+            "learning_rate": 0.02,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_dedicated_C1_V6_A8_QC97_identical": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 250,
+            "learning_rate": 0.02,
+            "subsample": 0.8,
+            "max_depth": 7,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_dedicated_C1_V6_A8_QC97_mild_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 250,
+            "learning_rate": 0.02,
+            "subsample": 0.8,
+            "max_depth": 7,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_dedicated_C1_V6_A8_QC99_identical": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 100,
+            "learning_rate": 0.06,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.9
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_dedicated_C1_V6_A8_QC99_mild_all": {
+      "single_agg": {
          "xgb": {
             "n_clusters": 1,
             "n_estimators": 250,
@@ -197,93 +261,749 @@
             "max_depth": 7,
             "colsample_bytree": 0.9
          }
-      },
-      "single_laststate": {
+      }
+   },
+   "mup_FIFO_EXP_l0.28_hybrid30_C1_V18_A5_QC97_identical": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 500,
+            "learning_rate": 0.02,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_hybrid30_C1_V18_A5_QC97_mild_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 100,
+            "learning_rate": 0.06,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.9
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_hybrid30_C1_V18_A8_QC97_identical": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 100,
+            "learning_rate": 0.06,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_hybrid30_C1_V18_A8_QC97_mild_all": {
+      "single_agg": {
          "xgb": {
             "n_clusters": 1,
             "n_estimators": 250,
             "learning_rate": 0.02,
-            "subsample": 0.5,
+            "subsample": 0.8,
+            "max_depth": 7,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_hybrid30_C1_V6_A12_QC100_identical": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 250,
+            "learning_rate": 0.02,
+            "subsample": 0.8,
+            "max_depth": 7,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_hybrid30_C1_V6_A12_QC100_mild_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 250,
+            "learning_rate": 0.02,
+            "subsample": 0.8,
+            "max_depth": 7,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_hybrid30_C1_V6_A12_QC100_strong_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 100,
+            "learning_rate": 0.06,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_hybrid30_C1_V6_A12_QC97_identical": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 250,
+            "learning_rate": 0.02,
+            "subsample": 0.8,
             "max_depth": 7,
             "colsample_bytree": 0.9
          }
       }
    },
-   "mup_scen1": {
-      "prefix_combined": {
+   "mup_FIFO_EXP_l0.28_hybrid30_C1_V6_A12_QC97_mild_all": {
+      "single_agg": {
          "xgb": {
-            "1": {
-               "n_clusters": 1,
-               "n_estimators": 100,
-               "learning_rate": 0.06,
-               "subsample": 0.8,
-               "max_depth": 3,
-               "colsample_bytree": 0.6
-            },
-            "2": {
-               "n_clusters": 1,
-               "n_estimators": 100,
-               "learning_rate": 0.06,
-               "subsample": 0.8,
-               "max_depth": 3,
-               "colsample_bytree": 0.6
-            },
-            "3": {
-               "n_clusters": 1,
-               "n_estimators": 250,
-               "learning_rate": 0.04,
-               "subsample": 0.8,
-               "max_depth": 5,
-               "colsample_bytree": 0.6
-            },
-            "4": {
-               "n_clusters": 1,
-               "n_estimators": 100,
-               "learning_rate": 0.04,
-               "subsample": 0.5,
-               "max_depth": 5,
-               "colsample_bytree": 0.6
-            },
-            "5": {
-               "n_clusters": 1,
-               "n_estimators": 100,
-               "learning_rate": 0.02,
-               "subsample": 0.5,
-               "max_depth": 7,
-               "colsample_bytree": 0.9
-            },
-            "6": {
-               "n_clusters": 1,
-               "n_estimators": 250,
-               "learning_rate": 0.04,
-               "subsample": 0.8,
-               "max_depth": 3,
-               "colsample_bytree": 0.9
-            },
-            "7": {
-               "n_clusters": 1,
-               "n_estimators": 250,
-               "learning_rate": 0.04,
-               "subsample": 0.5,
-               "max_depth": 3,
-               "colsample_bytree": 0.9
-            },
-            "8": {
-               "n_clusters": 1,
-               "n_estimators": 500,
-               "learning_rate": 0.02,
-               "subsample": 0.5,
-               "max_depth": 3,
-               "colsample_bytree": 0.9
-            },
-            "9": {
-               "n_clusters": 1,
-               "n_estimators": 100,
-               "learning_rate": 0.04,
-               "subsample": 0.8,
-               "max_depth": 5,
-               "colsample_bytree": 0.9
-            }
+            "n_clusters": 1,
+            "n_estimators": 100,
+            "learning_rate": 0.06,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.9
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_hybrid30_C1_V6_A12_QC97_strong_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 250,
+            "learning_rate": 0.02,
+            "subsample": 0.8,
+            "max_depth": 7,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_hybrid30_C1_V6_A12_QC99_identical": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 100,
+            "learning_rate": 0.06,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.9
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_hybrid30_C1_V6_A12_QC99_mild_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 100,
+            "learning_rate": 0.06,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_hybrid30_C1_V6_A12_QC99_strong_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 100,
+            "learning_rate": 0.06,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_hybrid30_C1_V6_A5_QC100_identical": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 250,
+            "learning_rate": 0.02,
+            "subsample": 0.8,
+            "max_depth": 7,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_hybrid30_C1_V6_A5_QC100_mild_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 500,
+            "learning_rate": 0.02,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_hybrid30_C1_V6_A5_QC100_strong_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 250,
+            "learning_rate": 0.04,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_hybrid30_C1_V6_A5_QC97_identical": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 500,
+            "learning_rate": 0.02,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_hybrid30_C1_V6_A5_QC97_mild_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 250,
+            "learning_rate": 0.02,
+            "subsample": 0.8,
+            "max_depth": 7,
+            "colsample_bytree": 0.9
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_hybrid30_C1_V6_A5_QC97_strong_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 250,
+            "learning_rate": 0.02,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.9
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_hybrid30_C1_V6_A5_QC99_identical": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 250,
+            "learning_rate": 0.02,
+            "subsample": 0.8,
+            "max_depth": 7,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_hybrid30_C1_V6_A5_QC99_mild_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 250,
+            "learning_rate": 0.04,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_hybrid30_C1_V6_A5_QC99_strong_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 250,
+            "learning_rate": 0.02,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_hybrid30_C1_V6_A8_QC100_identical": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 250,
+            "learning_rate": 0.02,
+            "subsample": 0.8,
+            "max_depth": 7,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_hybrid30_C1_V6_A8_QC100_mild_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 100,
+            "learning_rate": 0.06,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_hybrid30_C1_V6_A8_QC100_strong_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 250,
+            "learning_rate": 0.02,
+            "subsample": 0.8,
+            "max_depth": 7,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_hybrid30_C1_V6_A8_QC97_identical": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 100,
+            "learning_rate": 0.06,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_hybrid30_C1_V6_A8_QC97_mild_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 500,
+            "learning_rate": 0.02,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_hybrid30_C1_V6_A8_QC97_strong_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 250,
+            "learning_rate": 0.02,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.9
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_hybrid30_C1_V6_A8_QC99_identical": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 500,
+            "learning_rate": 0.02,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_hybrid30_C1_V6_A8_QC99_mild_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 250,
+            "learning_rate": 0.02,
+            "subsample": 0.8,
+            "max_depth": 7,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_hybrid30_C1_V6_A8_QC99_strong_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 100,
+            "learning_rate": 0.06,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_pooled_C1_V18_A5_QC97_identical": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 250,
+            "learning_rate": 0.02,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.9
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_pooled_C1_V18_A5_QC97_mild_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 500,
+            "learning_rate": 0.02,
+            "subsample": 0.5,
+            "max_depth": 5,
+            "colsample_bytree": 0.9
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_pooled_C1_V18_A8_QC97_identical": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 100,
+            "learning_rate": 0.06,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_pooled_C1_V18_A8_QC97_mild_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 500,
+            "learning_rate": 0.02,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.9
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_pooled_C1_V6_A12_QC100_identical": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 100,
+            "learning_rate": 0.06,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_pooled_C1_V6_A12_QC100_mild_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 100,
+            "learning_rate": 0.06,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_pooled_C1_V6_A12_QC100_strong_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 500,
+            "learning_rate": 0.02,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_pooled_C1_V6_A12_QC97_identical": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 500,
+            "learning_rate": 0.02,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.9
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_pooled_C1_V6_A12_QC97_mild_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 100,
+            "learning_rate": 0.06,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_pooled_C1_V6_A12_QC97_strong_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 100,
+            "learning_rate": 0.06,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.9
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_pooled_C1_V6_A12_QC99_identical": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 100,
+            "learning_rate": 0.06,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.9
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_pooled_C1_V6_A12_QC99_mild_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 100,
+            "learning_rate": 0.06,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.9
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_pooled_C1_V6_A12_QC99_strong_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 100,
+            "learning_rate": 0.06,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_pooled_C1_V6_A5_QC100_identical": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 100,
+            "learning_rate": 0.06,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_pooled_C1_V6_A5_QC100_mild_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 100,
+            "learning_rate": 0.06,
+            "subsample": 0.5,
+            "max_depth": 5,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_pooled_C1_V6_A5_QC100_strong_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 500,
+            "learning_rate": 0.02,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_pooled_C1_V6_A5_QC97_identical": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 100,
+            "learning_rate": 0.06,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.9
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_pooled_C1_V6_A5_QC97_mild_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 100,
+            "learning_rate": 0.06,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.9
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_pooled_C1_V6_A5_QC97_strong_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 250,
+            "learning_rate": 0.02,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.9
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_pooled_C1_V6_A5_QC99_identical": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 100,
+            "learning_rate": 0.06,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_pooled_C1_V6_A5_QC99_mild_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 100,
+            "learning_rate": 0.06,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.9
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_pooled_C1_V6_A5_QC99_strong_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 500,
+            "learning_rate": 0.02,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_pooled_C1_V6_A8_QC100_identical": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 100,
+            "learning_rate": 0.06,
+            "subsample": 0.5,
+            "max_depth": 5,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_pooled_C1_V6_A8_QC100_mild_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 500,
+            "learning_rate": 0.02,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_pooled_C1_V6_A8_QC100_strong_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 250,
+            "learning_rate": 0.04,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_pooled_C1_V6_A8_QC97_identical": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 100,
+            "learning_rate": 0.06,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.9
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_pooled_C1_V6_A8_QC97_mild_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 500,
+            "learning_rate": 0.02,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_pooled_C1_V6_A8_QC97_strong_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 100,
+            "learning_rate": 0.06,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_pooled_C1_V6_A8_QC99_identical": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 100,
+            "learning_rate": 0.06,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_pooled_C1_V6_A8_QC99_mild_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 500,
+            "learning_rate": 0.02,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.6
+         }
+      }
+   },
+   "mup_FIFO_EXP_l0.28_pooled_C1_V6_A8_QC99_strong_all": {
+      "single_agg": {
+         "xgb": {
+            "n_clusters": 1,
+            "n_estimators": 500,
+            "learning_rate": 0.02,
+            "subsample": 0.8,
+            "max_depth": 5,
+            "colsample_bytree": 0.6
          }
       }
    }

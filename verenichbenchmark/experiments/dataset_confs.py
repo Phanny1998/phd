@@ -89,7 +89,7 @@ import glob
 
 # CONTROL HOW MANY LOGS TO CONFIGURE
 # Set to None to configure ALL logs, or set a number (e.g., 10) to limit
-MAX_LOGS = 5  # Change this to None to process all 84 logs
+MAX_LOGS = None  # Change this to None to process all 84 logs
 
 # Find all processed MuProMAC logs
 mupromac_logs = glob.glob("../../out/251110/event_logs_processed_v2/*.csv")
